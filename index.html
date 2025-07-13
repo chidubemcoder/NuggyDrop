@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NuggyDrop</title>
+  <link rel="icon" href="nugget.png" type="image/png" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff8e1;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+    .logo {
+      width: 220px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    section {
+      padding: 30px 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+    .card {
+      background-color: #ffd700;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .price {
+      font-size: 0.95em;
+      font-weight: normal;
+      color: #444;
+      margin-top: 5px;
+    }
+    .sauce-menu {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #fff3cd;
+      border-radius: 10px;
+    }
+    .sauce-menu h3 {
+      margin-bottom: 10px;
+    }
+    .sauce-option {
+      margin: 5px 0;
+    }
+    .cart {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .confirmation {
+      padding: 20px;
+      background-color: #fff3cd;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.1em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .confirmation a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .confirmation button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .confirmation button:hover {
+      background-color: #218838;
+    }
+    .cart-buttons {
+      margin-top: 15px;
+    }
+    .cart-buttons button {
+      background-color: orange;
+      color: white;
+      font-weight: bold;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .cart-buttons button:hover {
+      background-color: darkorange;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9em;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="nugget.jpeg" alt="NuggyDrop Logo" class="logo" />
+  </header>
+
+  <section>
+    <h2>🍗 Nugget Menu</h2>
+
+    <div class="menu">
+      <div class="card" onclick="showSauceMenu('Classic Nuggets', 4.99)">
+        Classic Nuggets
+        <div class="price">£4.99</div>
+      </div>
+      <div class="card" onclick="showSauceMenu('Spicy Nuggets', 5.49)">
+        Spicy Nuggets
+        <div class="price">£5.49</div>
+      </div>
+      <div class="card" onclick="showSauceMenu('Vegan Nuggets', 5.99)">
+        Vegan Nuggets
+        <div class="price">£5.99</div>
+      </div>
+      <div class="card" onclick="showSauceMenu('Gluten-Free Nuggets', 5.49)">
+        Gluten-Free Nuggets
+        <div class="price">£5.49</div>
+      </div>
+    </div>
+
+    <div id="sauceMenu" class="sauce-menu">
+      <h3 id="sauceTitle">Choose your sauce:</h3>
+      <div class="sauce-option"><input type="checkbox" value="Ketchup" data-price="0.30" /> Ketchup (+£0.30)</div>
+      <div class="sauce-option"><input type="checkbox" value="Barbecue" data-price="0.40" /> Barbecue (+£0.40)</div>
+      <div class="sauce-option"><input type="checkbox" value="Garlic" data-price="0.35" /> Garlic (+£0.35)</div>
+      <button class="btn" type="button" onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <div class="cart">
+      <h3>Your Cart</h3>
+      <ul id="cartList"></ul>
+      <p><strong>Total: £<span id="cartTotal">0.00</span></strong></p>
+
+      <div class="cart-buttons">
+        <button onclick="clearCart()">Clear Cart</button>
+        <button onclick="placeOrder()">Place Order</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 NuggyDrop. All rights reserved.
+  </footer>
+
+  <script>
+    let selectedNugget = '';
+    let selectedPrice = 0;
+    let cart = [];
+
+    function showSauceMenu(nuggetType, price) {
+      selectedNugget = nuggetType;
+      selectedPrice = price;
+      document.getElementById('sauceTitle').innerText = `Choose your sauce for ${nuggetType}:`;
+      document.getElementById('sauceMenu').style.display = 'block';
+    }
+
+    function addToCart() {
+      const selectedSauces = Array.from(document.querySelectorAll('.sauce-option input:checked'));
+      const sauceNames = selectedSauces.map(s => s.value);
+      const saucePrices = selectedSauces.map(s => parseFloat(s.dataset.price));
+      const totalSaucePrice = saucePrices.reduce((a, b) => a + b, 0);
+
+      const finalPrice = selectedPrice + totalSaucePrice;
+      const itemText = `${selectedNugget} with ${sauceNames.join(', ') || 'no sauce'} — £${finalPrice.toFixed(2)}`;
+      cart.push({ item: itemText, price: finalPrice });
+      updateCartDisplay();
+
+      document.getElementById('sauceMenu').style.display = 'none';
+      document.querySelectorAll('.sauce-option input').forEach(i => i.checked = false);
+    }
+
+    function updateCartDisplay() {
+      const cartList = document.getElementById('cartList');
+      const cartTotal = document.getElementById('cartTotal');
+      cartList.innerHTML = '';
+      let total = 0;
+      cart.forEach(entry => {
+        const li = document.createElement('li');
+        li.innerText = entry.item;
+        cartList.appendChild(li);
+        total += entry.price;
+      });
+      cartTotal.innerText = total.toFixed(2);
+    }
+
+    function clearCart() {
+      cart = [];
+      updateCartDisplay();
+    }
+
+    function placeOrder() {
+      if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+
+      const cartSection = document.querySelector('.cart');
+      cartSection.innerHTML = `
+        <div class="confirmation">
+          <p>Thanks for your order!</p>
+          <p>Try my other website: <a href="https://chidubemcoder.github.io/HealthyMe/" target="_blank">HealthyMe</a></p>
+          <button onclick="resetOrder()">Order More Food</button>
+        </div>
+      `;
+
+      clearCart();
+    }
+
+    function resetOrder() {
+      location.reload();
+    }
+  </script>
+
+</body>
+</html>
